@@ -8,7 +8,7 @@ within `meltano.yml`.
 
 Run a PostgreSQL server with pgvector extension.
 ```shell
-docker compose -f docker-compose.yml up
+docker compose -f ../docker-compose.yml up
 ```
 
 In another shell, before running any `psql` command, define the authentication

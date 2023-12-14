@@ -1,0 +1,15 @@
+# Docker Compose file for pgvector -- open-source vector similarity search for PostgreSQL.
+# https://github.com/pgvector/pgvector
+---
+# docker compose -f docker-compose.yml up
+version: "2.1"
+services:
+  postgres:
+    image: ankane/pgvector:latest
+    command: postgres -c log_statement=all
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"

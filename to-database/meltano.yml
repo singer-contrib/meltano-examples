@@ -78,3 +78,10 @@ plugins:
     config:
       sqlalchemy_url: postgresql://postgres@localhost/
       add_record_metadata: true
+
+jobs:
+  - name: test
+    tasks:
+      - tap-smoke-test target-postgres
+      - load-jsonl-array-jsonb target-postgres
+      - load-jsonl-array-vector target-postgres

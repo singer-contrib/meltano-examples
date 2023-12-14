@@ -8,10 +8,7 @@ within `meltano.yml`.
 
 Run a PostgreSQL server with pgvector extension.
 ```shell
-docker run --rm -it --publish=5432:5432 \
-  --env "POSTGRES_HOST_AUTH_METHOD=trust" \
-  --volume "$(pwd)/init.sql:/docker-entrypoint-initdb.d/init.sql" \
-  ankane/pgvector postgres -c log_statement=all
+docker compose -f docker-compose.yml up
 ```
 
 In another shell, before running any `psql` command, define the authentication
@@ -48,6 +45,7 @@ psql postgresql://postgres@localhost/ --command '\d load_jsonl_array_jsonb.array
 psql postgresql://postgres@localhost/ --command 'SELECT * from load_jsonl_array_jsonb.array_float;'
 ```
 
+Run smoke tests.
 ```shell
 meltano run tap-smoke-test target-postgres
 psql postgresql://postgres@localhost/ --command '\dt tap_smoke_test.*'

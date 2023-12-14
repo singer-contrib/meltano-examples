@@ -1,0 +1,80 @@
+# Load data into PostgreSQL, pgvector, and CrateDB, using Meltano.
+#
+# A Meltano project exercising a few data loading tasks, defined
+# within `meltano.yml`.
+---
+version: 1
+send_anonymous_usage_stats: false
+environments:
+- name: dev
+default_environment: dev
+project_id: to-database-example
+plugins:
+
+  extractors:
+
+  - name: tap-smoke-test
+    namespace: tap_smoke_test
+    pip_url: git+https://github.com/meltano/tap-smoke-test.git
+    executable: tap-smoke-test
+    config:
+      streams:
+      - stream_name: animals
+        input_filename: https://gitlab.com/meltano/tap-smoke-test/-/raw/main/demo-data/animals-data.jsonl
+      - stream_name: page_views
+        input_filename: https://gitlab.com/meltano/tap-smoke-test/-/raw/main/demo-data/pageviews-data.jsonl
+      stream_maps:
+        animals:
+          __key_properties__: [id]
+        page_views:
+          __key_properties__: [vistor_id]
+
+  - name: tap-spreadsheets-anywhere
+    variant: ets
+    pip_url: git+https://github.com/singer-contrib/tap-spreadsheets-anywhere.git@json-container-types
+
+  - name: load-jsonl-array-jsonb
+    inherit_from: tap-spreadsheets-anywhere
+    config:
+      tables:
+        - path: file://../data
+          start_date: "1970-01-01T00:00:00Z"
+          pattern: "array-float\\.jsonl"
+          format: jsonl
+          key_properties: ["id"]
+          name: array_float
+
+  - name: load-jsonl-array-vector
+    inherit_from: tap-spreadsheets-anywhere
+    config:
+      tables:
+        - path: file://../data
+          start_date: "1970-01-01T00:00:00Z"
+          pattern: "array-float\\.jsonl"
+          format: jsonl
+          key_properties: ["id"]
+          name: array_float
+    schema:
+      array_float:
+        value:
+          type: "array"
+          items:
+            type: "number"
+          # FIXME: This is not a valid way to convey additional type information.
+          # https://github.com/meltano/sdk/issues/2102
+          # https://github.com/MeltanoLabs/target-postgres/pull/251
+          additionalProperties:
+            storage:
+              type: "vector"
+              dim: 4
+
+  loaders:
+  - name: target-postgres
+    variant: meltanolabs
+    # Classic PIP URLs.
+    pip_url: "git+https://github.com/singer-contrib/meltanolabs-target-postgres.git@pgvector#egg=meltanolabs-target-postgres[pgvector]"
+    # Modern PIP URLs. Does not work, yet.
+    #pip_url: "meltanolabs-target-postgres[pgvector] @ git+https://github.com/singer-contrib/meltanolabs-target-postgres.git@pgvector"
+    config:
+      sqlalchemy_url: postgresql://postgres@localhost/
+      add_record_metadata: true

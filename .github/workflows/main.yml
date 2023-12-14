@@ -64,6 +64,4 @@ jobs:
 
     - name: Verify "to-database"
       run: |
-        cd to-database
-        meltano install
-        meltano run test
+        ngr test to-database

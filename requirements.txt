@@ -1,2 +1,1 @@
 meltano==3.3.2
-pueblo @ git+https://github.com/pyveci/pueblo.git@main
